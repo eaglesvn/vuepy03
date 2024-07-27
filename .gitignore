@@ -42,5 +42,6 @@ Thumbs.db
 *.tar
 *.gz
 *.log
+*.vulv
 # Ignore directories named /sto
 /sto/
