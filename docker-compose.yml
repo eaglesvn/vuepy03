@@ -1,0 +1,43 @@
+services:
+  ttsstt:
+    build:
+      context: /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt
+      dockerfile: Dockerfile  # Point to Dockerfile for pyapp1_ttsstt
+    image: app1_ttsstt_img:0.0.01
+    ports:
+      - "6961:5001"
+    env_file:
+      - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/.env
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/logs:/app1/logs
+      - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/src/gunicorn:/app1/src/gunicorn
+
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6380:6379"
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+
+networks:
+  app-network:
+    driver: bridge

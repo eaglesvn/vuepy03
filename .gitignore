@@ -1,0 +1,46 @@
+# Python specific ignores
+__pycache__/
+*.pyc
+
+# Node modules
+node_modules/
+
+# Production directory
+dist/
+dist-ssr/
+coverage/
+
+# Local environment files
+*.local
+
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# Additional files to ignore
+.env
+.env.*.local
+.env1
+.env1.*.local
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.log
+# Ignore directories named /sto
+/sto/
