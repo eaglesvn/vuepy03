@@ -3,7 +3,7 @@ services:
     build:
       context: /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt
       dockerfile: Dockerfile  # Point to Dockerfile for pyapp1_ttsstt
-    image: app1_ttsstt_img:0.0.03
+    image: app1_ttsstt_img:0.0.04
     ports:
       - "6961:5001"
     env_file:

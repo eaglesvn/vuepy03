@@ -23,7 +23,8 @@ socketio = SocketIO(app1_mod_ttsstt, async_mode='gevent')
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Directory to save audio files
-AUDIO_DIR = Path('/home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/src/audio')
+AUDIO_DIR = Path('./src/audio')
+AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Start of STT Data Handling Subroutine ---
 # Route: Handle POST request to process STT data and generate response
@@ -85,7 +86,7 @@ def extract_and_convert_to_tts(text):
         # Send request to OpenAI TTS endpoint
         response = client.audio.speech.create(
             model="tts-1",
-            voice="shimmer",
+            voice="alloy",
             input=text
         )
 

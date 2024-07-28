@@ -10,6 +10,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set the working directory
 WORKDIR /ttsstt
 
+# Create a non-root user and docker group, add eaglesvn to docker group
+RUN useradd -m eaglesvn && \
+    groupadd -r docker && \
+    usermod -aG docker eaglesvn
+
 # Install system dependencies and clean up
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -18,11 +23,6 @@ RUN apt-get update && \
     tzdata && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Create a non-root user and docker group, add eaglesvn to docker group
-RUN useradd -m eaglesvn && \
-    groupadd -r docker && \
-    usermod -aG docker eaglesvn
 
 # Install Python dependencies
 COPY requirements.txt .
@@ -43,7 +43,7 @@ RUN mkdir -p /app1/src/gunicorn && mkdir -p /app1/logs && mkdir -p /app1/src/aud
 
 # Copy backend application code
 COPY ./src /app1/src
-RUN chown -R eaglesvn:eaglesvn /app1/src
+RUN chown -R eaglesvn:docker /app1/src
 
 # Switch to non-root user
 USER eaglesvn
