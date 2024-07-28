@@ -1,6 +1,8 @@
+# Import necessary modules and monkey patch for gevent
 from gevent import monkey  # type: ignore
 monkey.patch_all()
 
+# Import Flask and other necessary libraries
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 from openai import OpenAI
@@ -18,84 +20,89 @@ app1_mod_ttsstt.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 socketio = SocketIO(app1_mod_ttsstt, async_mode='gevent')
 
 # Initialize OpenAI client using environment variable for API key
-client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY'),
-    base_url='https://api.openai.com/v1'
-)
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Directory to save audio files
 AUDIO_DIR = Path('./src/audio')
 AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
-# Subroutine: Extract and Convert Text to Speech
-def extract_and_convert_to_tts(completion_response):
-    """
-    Extract text content from OpenAI completion response,
-    convert the text to speech using OpenAI TTS API, and save the MP3 file.
-    
-    :param completion_response: Response object from OpenAI completion
-    :return: Path to the saved MP3 file or None if failed
-    """
-    try:
-        # Extract text from OpenAI completion response
-        text = completion_response.choices[0].message.content
-        print(f'Extracted text for TTS: {text}')
-        
-        # Prepare payload for TTS request
-        tts_payload = {
-            "input": {"text": text},
-            "voice": {"language_code": "en-US", "name": "en-US-Wavenet-D"},
-            "audio_config": {"audio_encoding": "MP3"}
-        }
-        
-        # Send request to OpenAI TTS endpoint
-        tts_response = client.text_to_speech.create(
-            voice="en-US-Wavenet-D", 
-            text=text,
-            encoding="MP3"
-        )
-        
-        if tts_response.status_code == 200:
-            # Save the MP3 file
-            audio_path = AUDIO_DIR / 'response.mp3'
-            with open(audio_path, 'wb') as audio_file:
-                audio_file.write(tts_response.content)
-            print(f'MP3 saved to {audio_path}')
-            return audio_path
-        else:
-            print(f"Failed to get TTS response: {tts_response.json()}")
-            return None
-    except Exception as e:
-        print(f"An error occurred during TTS conversion: {e}")
-        return None
-
+# --- Start of STT Data Handling Subroutine ---
 # Route: Handle POST request to process STT data and generate response
 @app1_mod_ttsstt.route('/app1/api/app1_endpoint_ttsstt', methods=['POST'])
 def post_stt_data():
     """
     Handle POST requests to process STT data using OpenAI API,
-    generate a response, and return the response.
+    generate a response, convert it to speech, and return the response.
     
     :return: JSON response with success message or error message
     """
     try:
+        # Receive STT data as JSON from the client
         stt_data = request.json
         print(f'Received JSON data via HTTP POST: {stt_data}')
 
-        # Forward the STT data to OpenAI API using the correct method
+        # Forward the STT data to OpenAI API to generate a completion
         response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4",
             messages=stt_data['messages']
         )
 
-        # Print the response from OpenAI API
-        print(response.choices[0].message.content)
+        # Print the response from OpenAI API for debugging purposes
+        response_text = response['choices'][0]['message']['content']
+        print(response_text)
 
-        return jsonify(response.model_dump()), 200
+        # Convert the response text to speech and save it as an MP3 file
+        audio_path = extract_and_convert_to_tts(response_text)
+        
+        if audio_path:
+            # Return success message with the path to the saved audio file
+            return jsonify({"message": "success", "audio_path": str(audio_path)}), 200
+        else:
+            # Return error message if TTS conversion failed
+            return jsonify({"error": "Failed to convert text to speech"}), 500
 
     except Exception as e:
+        # Return error message if any exception occurs
         print(f"An error occurred: {e}")
         return jsonify({"error": str(e)}), 500
+# --- End of STT Data Handling Subroutine ---
+
+# --- Start of Text-to-Speech Subroutine ---
+# Subroutine: Extract and Convert Text to Speech
+def extract_and_convert_to_tts(text):
+    """
+    Extract text content from OpenAI completion response,
+    convert the text to speech using OpenAI TTS API, and save the MP3 file.
+    
+    :param text: Text to convert to speech
+    :return: Path to the saved MP3 file or None if failed
+    """
+    try:
+        print(f'Extracted text for TTS: {text}')
+        
+        # Define the path for the output audio file
+        audio_path = AUDIO_DIR / 'response.mp3'
+
+        # Send request to OpenAI TTS endpoint
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=text
+        )
+
+        # Save the MP3 file using the streaming response method
+        with open(audio_path, 'wb') as file:
+            for chunk in response:
+                file.write(chunk)
+
+        print(f'MP3 saved to {audio_path}')
+        return audio_path
+        
+    except Exception as e:
+        # Print and return error message if any exception occurs during TTS conversion
+        print(f"An error occurred during TTS conversion: {e}")
+        return None
+# --- End of Text-to-Speech Subroutine ---
 
 # Route: Simple test endpoint to check if the server is running
 @app1_mod_ttsstt.route('/test', methods=['GET'])

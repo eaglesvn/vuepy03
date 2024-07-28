@@ -3,7 +3,7 @@ services:
     build:
       context: /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt
       dockerfile: Dockerfile  # Point to Dockerfile for pyapp1_ttsstt
-    image: app1_ttsstt_img:0.0.01
+    image: app1_ttsstt_img:0.0.03
     ports:
       - "6961:5001"
     env_file:
@@ -23,6 +23,7 @@ services:
     volumes:
       - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/logs:/app1/logs
       - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/src/gunicorn:/app1/src/gunicorn
+      - /home/eaglesvn/Documents/dockerz/vuepy03/ttsstt/src/audio:/app1/src/audio
 
   redis:
     image: "redis:latest"

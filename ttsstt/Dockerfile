@@ -31,7 +31,7 @@ RUN pip install gunicorn[gevent] python-dotenv --no-cache-dir && \
     pip install --no-cache-dir -r requirements.txt
 
 # Create necessary directories and files, and set permissions
-RUN mkdir -p /app1/src/gunicorn && mkdir -p /app1/logs && \
+RUN mkdir -p /app1/src/gunicorn && mkdir -p /app1/logs && mkdir -p /app1/src/audio && \
     touch /app1/src/gunicorn/access.log /app1/src/gunicorn/error.log && \
     chown -R eaglesvn:docker /app1/src/gunicorn && \
     chmod -R 775 /app1/src/gunicorn && \
