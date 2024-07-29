@@ -34,12 +34,12 @@ RUN pip install gunicorn[gevent] python-dotenv --no-cache-dir && \
 RUN mkdir -p /app1/src/gunicorn && mkdir -p /app1/logs && mkdir -p /app1/src/audio && \
     touch /app1/src/gunicorn/access.log /app1/src/gunicorn/error.log && \
     chown -R eaglesvn:docker /app1/src/gunicorn && \
-    chmod -R 775 /app1/src/gunicorn && \
+    chmod -R 777 /app1/src/gunicorn && \
     touch /app1/logs/access.log /app1/logs/error.log && \
     chown -R eaglesvn:docker /app1/logs && \
-    chmod -R 775 /app1/logs && \
+    chmod -R 777 /app1/logs && \
     chown -R eaglesvn:docker /app1/src/audio && \
-    chmod -R 775 /app1/src/audio
+    chmod -R 777 /app1/src/audio
 
 # Copy backend application code
 COPY ./src /app1/src
